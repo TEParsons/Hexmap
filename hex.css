@@ -1,0 +1,55 @@
+@import url('https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&display=swap');
+
+* {
+  font-family: 'Silkscreen', cursive;
+}
+
+body {
+  display: grid;
+  grid-template-rows: min-content 1fr;
+  justify-items: center;
+  background: 
+    linear-gradient(42deg, #2C2C3400, #0C0C1400),
+    url(background.svg),
+    linear-gradient(42deg, #2C2C34, #0C0C14);
+}
+
+body > header {
+  margin: 2rem;
+  text-align: center;
+  color: white;
+  
+}
+
+footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 1rem;
+  max-height: 3rem;
+  background-color: rgba(0, 0, 0, 0.5);
+  color: white;
+  text-align: right;
+}
+
+nav {
+  display: grid;
+  gap: 1rem;
+  position: fixed;
+  right: 0;
+  bottom: 4rem;
+  padding: 2rem;
+}
+
+nav a {
+  text-align: right;
+}
+
+a {
+  color: white
+}
+a:hover {
+  color: yellow;
+}
+

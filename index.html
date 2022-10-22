@@ -1,0 +1,18 @@
+<head>
+  <link rel="stylesheet" href="hex.css" />
+  <script src="hex.js"></script>
+  <script src="functions.js"></script>
+</head>
+<header>
+  <h1>Hex Map Creator</h1>
+  <p>Select a tile on the left menu, then click on the map to place it.</p>
+</header>
+<nav>
+  <a onclick="exportMap()">Export ⭳</a>
+  <a onclick="importMap()">Import ⭱</a>
+  <input type="file" id=loadbuffer style="display:none"></input>
+</nav>
+<hex-grid id="map" data-cols=45 data-rows=25></hex-grid>
+<footer>
+  Created by <a href="https://github.com/TEParsons">Todd Parsons</a>, tiles via <a href="https://cuddlyclover.itch.io/fantasy-hex-tiles">Cuddly Clover on itch.io</a>
+</footer>
