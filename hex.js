@@ -51,6 +51,8 @@ class HexGrid extends HTMLElement {
     // Get number of columns and rows
     this.cols = this.dataset.cols;
     this.rows = this.dataset.rows;
+    // Get readonly state
+    this.readonly = "readonly" in this.dataset;
     // Set style
     this.style.display = "grid";
     this.style.gridAutoFlow = "row";
@@ -63,6 +65,9 @@ class HexGrid extends HTMLElement {
     this.appendChild(this.menu)
     this.menu.style.position = "absolute";
     this.menu.style.left = 0;
+    if (this.readonly) {
+      this.menu.style.display = "none";
+    }
     
     // Create tiles
     this.tiles = [];
@@ -70,7 +75,7 @@ class HexGrid extends HTMLElement {
     for (let row = 0; row < this.rows; row++) {
       for (let col = 0; col < this.cols; col++) {
         // Create tile
-        tile = new HexTile(this)
+        tile = new HexTile(this, this.readonly)
         this.tiles.push(tile)
         this.appendChild(tile)
         // Offset
@@ -80,13 +85,13 @@ class HexGrid extends HTMLElement {
         // Make sure higher up tiles are always on top
         tile.style.zIndex = row * 2 + col % 2;
         // Set attributes
-        tile.index = [row, col]
+        tile.index = [row, col];
         tile.type = "ocean";
       }
     }
 
     if (this.dataset['tiles']) {
-      importMap(this.dataset['tiles'])
+      this.import(this.dataset['tiles'].split(","))
     }
   }
 
@@ -109,9 +114,10 @@ class HexGrid extends HTMLElement {
 customElements.define("hex-grid", HexGrid);
 
 class HexTile extends HTMLElement {
-  constructor(parent) {
+  constructor(parent, readonly=False) {
     super();
     this.parent = parent;
+    this.readonly = readonly;
   }
 
   connectedCallback() {
@@ -127,7 +133,9 @@ class HexTile extends HTMLElement {
     // Start off as placeholder
     this.type = this._type;
     // Bind onclick function
-    this.onclick = this.set;
+    if (!this.readonly) {
+      this.onclick = this.set;
+    }
   }
 
   set() {
@@ -270,7 +278,8 @@ function loadFile(file) {
     let raw = reader.result;
     map.import(raw.split(","));
   })
-  reader.readAsText(file);
+  let tiles = reader.readAsText(file);
+  map.import(tiles)
 }
 
 function importMap(map) {
