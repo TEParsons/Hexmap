@@ -8,8 +8,8 @@
   <p>Select a tile on the left menu, then click on the map to place it.</p>
 </header>
 <nav>
-  <a onclick="exportMap()">Export ⭳</a>
-  <a onclick="importMap()">Import ⭱</a>
+  <a onclick="exportMap(map)">Export ⭳</a>
+  <a onclick="importMap(map)">Import ⭱</a>
   <input type="file" id=loadbuffer style="display:none"></input>
 </nav>
 <hex-grid id="map" data-cols=45 data-rows=25></hex-grid>

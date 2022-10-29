@@ -253,8 +253,7 @@ class IconOption extends HTMLElement {
 customElements.define("icon-option", IconOption);
 
 
-function exportMap() {
-  let map = document.getElementById("map");
+function exportMap(map) {
   // Get tile values
   let tiles = map.export()
   let tilesCSV = tiles.join(",")
@@ -274,8 +273,7 @@ function loadFile(file) {
   reader.readAsText(file);
 }
 
-function importMap(tiles) {
-  let map = document.getElementById("map");
+function importMap(map) {
   let loadbuffer = document.getElementById("loadbuffer");
   // Load the .csv file to a list
   loadbuffer.onchange = function () {
