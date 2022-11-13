@@ -54,9 +54,10 @@ class HexGrid extends HTMLElement {
     this.style.gridAutoFlow = "row";
     this.style.columnGap = "8px";
     this.style.rowGap = "14px";
-    // Set number of columns and rows
-    this.cols = this.dataset.cols;
-    this.rows = this.dataset.rows;
+    // Create tiles array
+    this.tiles = [];
+    // Set number of rows and columns
+    this.resize(this.rows, this.cols);
     // Create menu
     this.menu = new IconPicker();
     this.appendChild(this.menu)
@@ -65,52 +66,59 @@ class HexGrid extends HTMLElement {
     if (this.readonly) {
       this.menu.style.display = "none";
     }
-    
-    // Create tiles
-    this.tiles = [];
-    let tile
-    for (let row = 0; row < this.rows; row++) {
-      this.tiles.push([])
-      for (let col = 0; col < this.cols; col++) {
-        // Create tile
-        tile = new HexTile(this, this.readonly)
-        this.tiles[row].push(tile)
-        this.appendChild(tile)
-        // Offset
-        if (col % 2) {
-          tile.style.top = "14px";
-        }
-        // Make sure higher up tiles are always on top
-        tile.style.zIndex = row + col % 2;
-        // Set attributes
-        tile.index = [row, col];
-        tile.type = "ocean";
-      }
-    }
-
+    // If given data, load it
     if (this.dataset['tiles']) {
-      this.import(this.dataset['tiles'].split(","))
+      let raw = this.dataset['tiles'].split("\n")
+      let data = []
+      for (let row of raw) {
+        data.push(row.split(","))
+      }
+      this.import(data)
     }
   }
 
+  resize(rows, cols) {
+    this.rows = rows;
+    this.cols = cols;
+    // Setup css grid
+    this.style.gridTemplateRows = `repeat(${rows}, 14px)`;
+    this.style.gridTemplateColumns = `repeat(${cols}, 16px)`;
+    // Destroy all tiles
+    for (let row of this.tiles) {
+      for (let tile of row) {
+        tile.remove()
+      }
+    }
+    this.tiles = []
+    // Create rows
+    while (this.tiles.length < rows) {
+      this.tiles.push([])
+    }
+    // Go through each row to manage columns
+    for (let row = 0; row < rows; row++) {
+      // Fill rows with cells
+      while (this.tiles[row].length < cols) {
+        let tile;
+        // Create tile
+        tile = new HexTile(this, [row, this.tiles[row].length + 1], this.readonly)
+        this.tiles[row].push(tile)
+        this.appendChild(tile)
+      }
+    }
+  }
+  
   get rows() {
     return this.dataset.rows;
   }
   set rows(value) {
-    // Store value
     this.dataset.rows = value;
-    // Set css grid rows
-    this.style.gridTemplateRows = `repeat(${value}, 14px)`;
   }
 
   get cols() {
     return this.dataset.cols;
   }
   set cols(value) {
-    // Store value
     this.dataset.cols = value;
-    // Set css grid columns
-    this.style.gridTemplateColumns = `repeat(${value}, 16px)`;
   }
 
   export() {
@@ -126,8 +134,7 @@ class HexGrid extends HTMLElement {
   
   import(tiles) {
     // Match file data dimensions
-    this.rows = tiles.length;
-    this.cols = Math.max(0,...tiles.map(s=>s.length));
+    this.resize(tiles.length, Math.max(0,...tiles.map(s=>s.length)))
     // Import each cell of file data
     for (let row = 0; row < this.rows; row++) {
       for (let col = 0; col < this.cols; col++) {
@@ -139,10 +146,20 @@ class HexGrid extends HTMLElement {
 customElements.define("hex-grid", HexGrid);
 
 class HexTile extends HTMLElement {
-  constructor(parent, readonly=False) {
+  constructor(parent, index, readonly=False) {
     super();
+    // Set attributes
     this.parent = parent;
     this.readonly = readonly;
+    this.index = index;
+    this.row = this.index[0];
+    this.col = this.index[1];
+    // Offset
+    if (this.col % 2) {
+      this.style.top = "14px";
+    }
+    // Make sure higher up tiles are always on top
+    this.style.zIndex = this.row + this.col % 2;
   }
 
   connectedCallback() {
@@ -156,7 +173,7 @@ class HexTile extends HTMLElement {
     this.img.style.bottom = "-1px";
     this.appendChild(this.img)
     // Start off as placeholder
-    this.type = this._type;
+    this.type = "ocean";
     // Bind onclick function
     if (!this.readonly) {
       this.onclick = this.set;
@@ -308,7 +325,9 @@ function loadFile(file) {
     let processed = [];
     let rows = raw.split("\n");
     for (let row of rows) {
-      processed.push(row.split(","))
+      if (row.includes(",")) {
+        processed.push(row.split(","))
+      }
     }
     map.import(processed);
   })
