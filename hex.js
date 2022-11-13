@@ -47,19 +47,16 @@ tileImages = [
 
 class HexGrid extends HTMLElement {
   connectedCallback() {
-    
-    // Get number of columns and rows
-    this.cols = this.dataset.cols;
-    this.rows = this.dataset.rows;
     // Get readonly state
     this.readonly = "readonly" in this.dataset;
     // Set style
     this.style.display = "grid";
     this.style.gridAutoFlow = "row";
-    this.style.gridTemplateColumns = `repeat(${this.cols}, 16px)`;
-    this.style.gridTemplateRows = `repeat(${this.rows}, 14px)`;
     this.style.columnGap = "8px";
     this.style.rowGap = "14px";
+    // Set number of columns and rows
+    this.cols = this.dataset.cols;
+    this.rows = this.dataset.rows;
     // Create menu
     this.menu = new IconPicker();
     this.appendChild(this.menu)
@@ -96,6 +93,26 @@ class HexGrid extends HTMLElement {
     }
   }
 
+  get rows() {
+    return this.dataset.rows;
+  }
+  set rows(value) {
+    // Store value
+    this.dataset.rows = value;
+    // Set css grid rows
+    this.style.gridTemplateRows = `repeat(${value}, 14px)`;
+  }
+
+  get cols() {
+    return this.dataset.cols;
+  }
+  set cols(value) {
+    // Store value
+    this.dataset.cols = value;
+    // Set css grid columns
+    this.style.gridTemplateColumns = `repeat(${value}, 16px)`;
+  }
+
   export() {
     let tiles = [];
     for (let row = 0; row < this.rows; row++) {
@@ -108,6 +125,10 @@ class HexGrid extends HTMLElement {
   }
   
   import(tiles) {
+    // Match file data dimensions
+    this.rows = tiles.length;
+    this.cols = Math.max(0,...tiles.map(s=>s.length));
+    // Import each cell of file data
     for (let row = 0; row < this.rows; row++) {
       for (let col = 0; col < this.cols; col++) {
         this.tiles[row][col].type = tiles[row][col]
