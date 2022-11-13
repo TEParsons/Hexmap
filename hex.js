@@ -73,17 +73,18 @@ class HexGrid extends HTMLElement {
     this.tiles = [];
     let tile
     for (let row = 0; row < this.rows; row++) {
+      this.tiles.push([])
       for (let col = 0; col < this.cols; col++) {
         // Create tile
         tile = new HexTile(this, this.readonly)
-        this.tiles.push(tile)
+        this.tiles[row].push(tile)
         this.appendChild(tile)
         // Offset
         if (col % 2) {
           tile.style.top = "14px";
         }
         // Make sure higher up tiles are always on top
-        tile.style.zIndex = row * 2 + col % 2;
+        tile.style.zIndex = row + col % 2;
         // Set attributes
         tile.index = [row, col];
         tile.type = "ocean";
@@ -97,17 +98,20 @@ class HexGrid extends HTMLElement {
 
   export() {
     let tiles = [];
-    for (let tile of this.tiles) {
-      tiles.push(tile.type);
+    for (let row = 0; row < this.rows; row++) {
+      tiles.push([])
+      for (let col = 0; col < this.cols; col++) {
+        tiles[row].push(this.tiles[row][col].type);
+      }
     }
     return tiles
   }
   
   import(tiles) {
-    let i = 0;
-    for (let tile of this.tiles) {
-      tile.type = tiles[i]
-      i += 1;
+    for (let row = 0; row < this.rows; row++) {
+      for (let col = 0; col < this.cols; col++) {
+        this.tiles[row][col].type = tiles[row][col]
+      }
     }
   }
 }
@@ -264,7 +268,11 @@ customElements.define("icon-option", IconOption);
 function exportMap(map) {
   // Get tile values
   let tiles = map.export()
-  let tilesCSV = tiles.join(",")
+  let tilesCSV = []
+  for (let row of tiles) {
+    tilesCSV.push(row.join(","))
+  }
+  tilesCSV = tilesCSV.join("\n")
 
   // Save to file
   let file = new Blob([tilesCSV], { type: "text/csv" });
@@ -276,10 +284,14 @@ function loadFile(file) {
   let reader = new FileReader();
   reader.addEventListener("loadend", function () {
     let raw = reader.result;
-    map.import(raw.split(","));
+    let processed = [];
+    let rows = raw.split("\n");
+    for (let row of rows) {
+      processed.push(row.split(","))
+    }
+    map.import(processed);
   })
-  let tiles = reader.readAsText(file);
-  map.import(tiles)
+  reader.readAsText(file);
 }
 
 function importMap(map) {
