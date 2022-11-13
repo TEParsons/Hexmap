@@ -16,6 +16,7 @@ body {
     linear-gradient(42deg, #2C2C3400, #0C0C1400),
     url(background.svg),
     linear-gradient(42deg, #2C2C34, #0C0C14);
+  padding-bottom: 4rem;
 }
 
 body > header {
@@ -23,6 +24,11 @@ body > header {
   text-align: center;
   color: white;
   
+}
+
+hex-grid {
+  max-width: calc(100vw - 35rem);
+  overflow: auto;
 }
 
 footer {

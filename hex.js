@@ -54,6 +54,7 @@ class HexGrid extends HTMLElement {
     this.style.gridAutoFlow = "row";
     this.style.columnGap = "8px";
     this.style.rowGap = "14px";
+    this.style.padding = "14px";
     // Create tiles array
     this.tiles = [];
     // Set number of rows and columns
