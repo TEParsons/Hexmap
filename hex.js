@@ -66,6 +66,14 @@ class HexGrid extends HTMLElement {
     if (this.readonly) {
       this.menu.style.display = "none";
     }
+    // Create size ctrls
+    this.sizeCtrls = new SizeCtrls(parent=this)
+    this.appendChild(this.sizeCtrls)
+    this.sizeCtrls.style.position = "absolute";
+    this.sizeCtrls.style.right = 0;
+    if (this.readonly) {
+      this.sizeCtrls.style.display = "none";
+    }
     // If given data, load it
     if (this.dataset['tiles']) {
       let raw = this.dataset['tiles'].split("\n")
@@ -78,11 +86,15 @@ class HexGrid extends HTMLElement {
   }
 
   resize(rows, cols) {
-    this.rows = rows;
-    this.cols = cols;
+    if (rows) {
+      this.rows = rows;
+    }
+    if (cols) {
+      this.cols = cols;
+    }
     // Setup css grid
-    this.style.gridTemplateRows = `repeat(${rows}, 14px)`;
-    this.style.gridTemplateColumns = `repeat(${cols}, 16px)`;
+    this.style.gridTemplateRows = `repeat(${this.rows}, 14px)`;
+    this.style.gridTemplateColumns = `repeat(${this.cols}, 16px)`;
     // Destroy all tiles
     for (let row of this.tiles) {
       for (let tile of row) {
@@ -91,13 +103,13 @@ class HexGrid extends HTMLElement {
     }
     this.tiles = []
     // Create rows
-    while (this.tiles.length < rows) {
+    while (this.tiles.length < this.rows) {
       this.tiles.push([])
     }
     // Go through each row to manage columns
-    for (let row = 0; row < rows; row++) {
+    for (let row = 0; row < this.rows; row++) {
       // Fill rows with cells
-      while (this.tiles[row].length < cols) {
+      while (this.tiles[row].length < this.cols) {
         let tile;
         // Create tile
         tile = new HexTile(this, [row, this.tiles[row].length + 1], this.readonly)
@@ -208,6 +220,7 @@ class IconPicker extends HTMLElement {
     this.style.display = "grid";
     this.style.gridTemplateColumns = "repeat(3, 1fr)";
     this.style.padding = "14px";
+    this.style.zIndex = 100;
     // Make icons
     this.options = {}
     for (let imgFile of tileImages) {
@@ -302,6 +315,54 @@ class IconOption extends HTMLElement {
 }
 customElements.define("icon-option", IconOption);
 
+class SizeCtrls extends HTMLElement {
+  constructor(parent) {
+    super();
+    this.parent = parent;
+  }
+  
+  connectedCallback() {
+    // Style size ctrls box
+    this.style.display = "grid";
+    this.style.gridTemplateColumns = "10rem"; 
+    this.style.width = "10rem";
+    this.style.padding = "1rem";
+    this.style.zIndex = 100;
+    // Create row lbl
+    this.rowLbl = document.createElement("label");
+    this.rowLbl.textContent = "Rows:";
+    this.rowLbl.marginTop = "1rem";
+    this.appendChild(this.rowLbl);
+    // Create row ctrl
+    this.rowCtrl = document.createElement("input");
+    this.rowCtrl.value = this.parent.rows;
+    this.rowCtrl.grid = this.parent;
+    this.rowCtrl.type = "number";
+    this.rowCtrl.onchange = this.onSetRows
+    this.appendChild(this.rowCtrl)
+    // Create col lbl
+    this.colLbl = document.createElement("label");
+    this.colLbl.textContent = "Columns:";
+    this.colLbl.marginTop = "1rem";
+    this.appendChild(this.colLbl);
+    // Create col ctrl
+    this.colCtrl = document.createElement("input");
+    this.colCtrl.value = this.parent.cols;
+    this.colCtrl.grid = this.parent;
+    this.colCtrl.type = "number";
+    this.colCtrl.onchange = this.onSetCols
+    this.appendChild(this.colCtrl)
+  }
+
+  onSetRows(evt) {
+    this.grid.resize(this.value, undefined)
+  }
+
+  onSetCols(evt) {
+    this.grid.resize(undefined, this.value)
+  }
+}
+customElements.define("hex-size-ctrls", SizeCtrls);
 
 function exportMap(map) {
   // Get tile values
