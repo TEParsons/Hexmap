@@ -203,7 +203,7 @@ class HexTile extends HTMLElement {
   }
   set type(value) {
     this._type = value;
-    this.src = `tiles/${this._type}.png`;
+    this.src = `https://teparsons.github.io/Hexmap/tiles/${this._type}.png`;
   }
 
   get src() {
