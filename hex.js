@@ -45,119 +45,6 @@ tileImages = [
   "tiles/ruins.png",
 ]
 
-class HexGrid extends HTMLElement {
-  connectedCallback() {
-    // Get readonly state
-    this.readonly = "readonly" in this.dataset;
-    // Set style
-    this.style.display = "grid";
-    this.style.gridAutoFlow = "row";
-    this.style.columnGap = "8px";
-    this.style.rowGap = "14px";
-    this.style.padding = "14px";
-    // Create tiles array
-    this.tiles = [];
-    // Set number of rows and columns
-    this.resize(this.rows, this.cols);
-    // Create menu
-    this.menu = new IconPicker();
-    this.appendChild(this.menu)
-    this.menu.style.position = "absolute";
-    this.menu.style.left = 0;
-    if (this.readonly) {
-      this.menu.style.display = "none";
-    }
-    // Create size ctrls
-    this.sizeCtrls = new SizeCtrls(parent=this)
-    this.appendChild(this.sizeCtrls)
-    this.sizeCtrls.style.position = "absolute";
-    this.sizeCtrls.style.right = 0;
-    if (this.readonly) {
-      this.sizeCtrls.style.display = "none";
-    }
-    // If given data, load it
-    if (this.dataset['tiles']) {
-      let raw = this.dataset['tiles'].split("\n")
-      let data = []
-      for (let row of raw) {
-        data.push(row.split(","))
-      }
-      this.import(data)
-    }
-  }
-
-  resize(rows, cols) {
-    if (rows) {
-      this.rows = rows;
-    }
-    if (cols) {
-      this.cols = cols;
-    }
-    // Setup css grid
-    this.style.gridTemplateRows = `repeat(${this.rows}, 14px)`;
-    this.style.gridTemplateColumns = `repeat(${this.cols}, 16px)`;
-    // Destroy all tiles
-    for (let row of this.tiles) {
-      for (let tile of row) {
-        tile.remove()
-      }
-    }
-    this.tiles = []
-    // Create rows
-    while (this.tiles.length < this.rows) {
-      this.tiles.push([])
-    }
-    // Go through each row to manage columns
-    for (let row = 0; row < this.rows; row++) {
-      // Fill rows with cells
-      while (this.tiles[row].length < this.cols) {
-        let tile;
-        // Create tile
-        tile = new HexTile(this, [row, this.tiles[row].length + 1], this.readonly)
-        this.tiles[row].push(tile)
-        this.appendChild(tile)
-      }
-    }
-  }
-  
-  get rows() {
-    return this.dataset.rows;
-  }
-  set rows(value) {
-    this.dataset.rows = value;
-  }
-
-  get cols() {
-    return this.dataset.cols;
-  }
-  set cols(value) {
-    this.dataset.cols = value;
-  }
-
-  export() {
-    let tiles = [];
-    for (let row = 0; row < this.rows; row++) {
-      tiles.push([])
-      for (let col = 0; col < this.cols; col++) {
-        tiles[row].push(this.tiles[row][col].type);
-      }
-    }
-    return tiles
-  }
-  
-  import(tiles) {
-    // Match file data dimensions
-    this.resize(tiles.length, Math.max(0,...tiles.map(s=>s.length)))
-    // Import each cell of file data
-    for (let row = 0; row < this.rows; row++) {
-      for (let col = 0; col < this.cols; col++) {
-        this.tiles[row][col].type = tiles[row][col]
-      }
-    }
-  }
-}
-customElements.define("hex-grid", HexGrid);
-
 class HexTile extends HTMLElement {
   constructor(parent, index, readonly=False) {
     super();
@@ -405,3 +292,116 @@ function importMap(map) {
   // Click to trigger previously defined functions
   loadbuffer.click();
 }
+
+class HexGrid extends HTMLElement {
+  connectedCallback() {
+    // Get readonly state
+    this.readonly = "readonly" in this.dataset;
+    // Set style
+    this.style.display = "grid";
+    this.style.gridAutoFlow = "row";
+    this.style.columnGap = "8px";
+    this.style.rowGap = "14px";
+    this.style.padding = "14px";
+    // Create tiles array
+    this.tiles = [];
+    // Set number of rows and columns
+    this.resize(this.rows, this.cols);
+    // Create menu
+    this.menu = new IconPicker();
+    this.appendChild(this.menu)
+    this.menu.style.position = "absolute";
+    this.menu.style.left = 0;
+    if (this.readonly) {
+      this.menu.style.display = "none";
+    }
+    // Create size ctrls
+    this.sizeCtrls = new SizeCtrls(parent=this)
+    this.appendChild(this.sizeCtrls)
+    this.sizeCtrls.style.position = "absolute";
+    this.sizeCtrls.style.right = 0;
+    if (this.readonly) {
+      this.sizeCtrls.style.display = "none";
+    }
+    // If given data, load it
+    if (this.dataset['tiles']) {
+      let raw = this.dataset['tiles'].split("\n")
+      let data = []
+      for (let row of raw) {
+        data.push(row.split(","))
+      }
+      this.import(data)
+    }
+  }
+
+  resize(rows, cols) {
+    if (rows) {
+      this.rows = rows;
+    }
+    if (cols) {
+      this.cols = cols;
+    }
+    // Setup css grid
+    this.style.gridTemplateRows = `repeat(${this.rows}, 14px)`;
+    this.style.gridTemplateColumns = `repeat(${this.cols}, 16px)`;
+    // Destroy all tiles
+    for (let row of this.tiles) {
+      for (let tile of row) {
+        tile.remove()
+      }
+    }
+    this.tiles = []
+    // Create rows
+    while (this.tiles.length < this.rows) {
+      this.tiles.push([])
+    }
+    // Go through each row to manage columns
+    for (let row = 0; row < this.rows; row++) {
+      // Fill rows with cells
+      while (this.tiles[row].length < this.cols) {
+        let tile;
+        // Create tile
+        tile = new HexTile(this, [row, this.tiles[row].length + 1], this.readonly)
+        this.tiles[row].push(tile)
+        this.appendChild(tile)
+      }
+    }
+  }
+  
+  get rows() {
+    return this.dataset.rows;
+  }
+  set rows(value) {
+    this.dataset.rows = value;
+  }
+
+  get cols() {
+    return this.dataset.cols;
+  }
+  set cols(value) {
+    this.dataset.cols = value;
+  }
+
+  export() {
+    let tiles = [];
+    for (let row = 0; row < this.rows; row++) {
+      tiles.push([])
+      for (let col = 0; col < this.cols; col++) {
+        tiles[row].push(this.tiles[row][col].type);
+      }
+    }
+    return tiles
+  }
+  
+  import(tiles) {
+    // Match file data dimensions
+    this.resize(tiles.length, Math.max(0,...tiles.map(s=>s.length)))
+    // Import each cell of file data
+    for (let row = 0; row < this.rows; row++) {
+      for (let col = 0; col < this.cols; col++) {
+        this.tiles[row][col].type = tiles[row][col]
+      }
+    }
+  }
+}
+customElements.define("hex-grid", HexGrid);
